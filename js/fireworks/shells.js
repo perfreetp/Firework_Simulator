@@ -344,6 +344,62 @@ function launchShellFromConfig(event) {
 	);
 }
 
+function createShellDefinition(options) {
+	const sizeValue = Number(options.size);
+	const size = Number.isFinite(sizeValue) ? sizeValue : shellSizeSelector();
+	let factory;
+
+	if (options.shell && options.shell !== "Random" && shellTypes[options.shell]) {
+		factory = shellTypes[options.shell];
+	} else {
+		factory = randomShell;
+	}
+
+	const definition = factory(size);
+	if (options.color && options.color !== "random" && COLOR_CODES.includes(options.color)) {
+		definition.color = options.color;
+	}
+
+	if (options.word) {
+		definition.color = options.color && options.color !== "random" && COLOR_CODES.includes(options.color) ? options.color : COLOR.White;
+	}
+
+	return definition;
+}
+
+function launchShellWithOptions(options) {
+	const definition = createShellDefinition(options);
+	const shell = new Shell(definition);
+
+	const position = Number(options.position);
+	const height = Number(options.height);
+	const launchPosition = Number.isFinite(position) ? fitShellPositionInBoundsH(position) : getRandomShellPositionH();
+	const launchHeight = Number.isFinite(height) ? fitShellPositionInBoundsV(height) : getRandomShellPositionV();
+
+	if (options.word) {
+		shell.forceWordBurst = true;
+		shell.wordText = options.word;
+		wordBurstTracker.reset();
+	}
+
+	shell.launch(launchPosition, launchHeight);
+	return shell;
+}
+
+function launchWishShell(word) {
+	const position = getRandomShellPositionH();
+	const height = fitShellPositionInBoundsV(0.55 + Math.random() * 0.3);
+	const size = IS_MOBILE ? Math.max(0, shellSizeSelector() - 1) : shellSizeSelector();
+	return launchShellWithOptions({
+		shell: "Crysanthemum",
+		size,
+		color: "random",
+		position,
+		height,
+		word,
+	});
+}
+
 function seqRandomShell() {
 	const size = getRandomShellSize();
 	const shell = new Shell(shellFromConfig(size.size));

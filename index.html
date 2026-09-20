@@ -38,6 +38,24 @@
 				<symbol id="icon-sound-off" viewBox="0 0 24 24">
 					<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
 				</symbol>
+				<symbol id="icon-show" viewBox="0 0 24 24">
+					<path d="M3 17h2v4H3v-4zm4-4h2v8H7v-8zm4-6h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
+				</symbol>
+				<symbol id="icon-wish" viewBox="0 0 24 24">
+					<path d="M12 2l2.4 5.6L20 8.3l-4.3 3.9 1.3 5.8L12 14.9 7 18l1.3-5.8L4 8.3l5.6-.7L12 2z" />
+				</symbol>
+				<symbol id="icon-stop" viewBox="0 0 24 24">
+					<path d="M6 6h12v12H6z" />
+				</symbol>
+				<symbol id="icon-skip" viewBox="0 0 24 24">
+					<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+				</symbol>
+				<symbol id="icon-edit" viewBox="0 0 24 24">
+					<path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+				</symbol>
+				<symbol id="icon-trash" viewBox="0 0 24 24">
+					<path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+				</symbol>
 			</svg>
 		</div>
 		<!-- App -->
@@ -66,6 +84,16 @@
 						<svg fill="white" width="24" height="24" aria-hidden="true">
 							<use href="#icon-settings" xlink:href="#icon-settings"></use>
 						</svg>
+					</button>
+					<button class="btn btn--bright show-btn" type="button" aria-label="烟花秀编排">
+						<svg fill="white" width="22" height="22" aria-hidden="true">
+							<use href="#icon-show" xlink:href="#icon-show"></use>
+						</svg>
+					</button>
+					<button class="btn btn--bright wish-btn" type="button" aria-label="许愿">
+						<svg fill="white" width="22" height="22" aria-hidden="true">
+							<use href="#icon-wish" xlink:href="#icon-wish"></use>
+					</svg>
 					</button>
 				</div>
 				<div class="menu hide">
@@ -142,6 +170,134 @@
 					</div>
 				</div>
 			</div>
+			<div class="side-panel show-panel hide">
+				<div class="side-panel__dialog">
+					<button class="btn btn--bright side-panel__close-btn show-panel__close-btn" type="button" aria-label="关闭烟花秀编排">
+						<svg fill="white" width="24" height="24" aria-hidden="true">
+							<use href="#icon-close" xlink:href="#icon-close"></use>
+						</svg>
+					</button>
+					<div class="side-panel__header">烟花秀编排</div>
+					<div class="side-panel__subheader">在时间轴上编排节目，自动保存到本地</div>
+
+					<div class="show-toolbar">
+						<select class="show-select" aria-label="选择节目单"></select>
+						<button class="panel-btn show-new-btn" type="button">新建</button>
+						<button class="panel-btn show-delete-btn" type="button">删除</button>
+					</div>
+					<div class="show-name-row">
+						<input class="show-name-input" type="text" maxlength="30" placeholder="节目单名称" autocomplete="off" spellcheck="false" />
+						<button class="panel-btn show-save-btn" type="button">保存名称</button>
+					</div>
+					<div class="show-file-row">
+						<button class="panel-btn show-export-btn" type="button">导出文件</button>
+						<button class="panel-btn show-import-btn" type="button">导入文件</button>
+						<input class="show-import-file" type="file" accept="application/json,.json" hidden />
+					</div>
+
+					<div class="show-total">总时长 <span class="show-total__value">00:00</span></div>
+
+					<div class="show-program-list"></div>
+					<div class="show-program-empty">还没有节目，在下方添加第一发烟花吧</div>
+
+					<form class="program-add-form">
+						<div class="program-form-title">添加节目</div>
+						<div class="program-form-grid">
+							<label class="program-field">
+								<span>时间(秒)</span>
+								<input class="program-time" type="number" min="0" step="0.1" value="0" inputmode="decimal" />
+							</label>
+							<label class="program-field">
+								<span>类型</span>
+								<select class="program-shell"></select>
+							</label>
+							<label class="program-field">
+								<span>大小</span>
+								<select class="program-size"></select>
+							</label>
+							<label class="program-field">
+								<span>颜色</span>
+								<select class="program-color"></select>
+							</label>
+							<label class="program-field program-field--range">
+								<span>发射位置 <em class="program-position-value">50%</em></span>
+								<input class="program-position" type="range" min="0" max="1" step="0.01" value="0.5" />
+							</label>
+							<label class="program-field program-field--range">
+								<span>绽放高度 <em class="program-height-value">50%</em></span>
+								<input class="program-height" type="range" min="0" max="1" step="0.01" value="0.5" />
+							</label>
+							<label class="program-field program-field--check">
+								<span>文字烟花</span>
+								<input class="program-use-word" type="checkbox" />
+							</label>
+							<label class="program-field program-field--word">
+								<span>文字内容</span>
+								<input class="program-word" type="text" maxlength="12" placeholder="最多 12 个字" disabled autocomplete="off" spellcheck="false" />
+							</label>
+						</div>
+						<button class="panel-btn panel-btn--primary program-add-btn" type="submit">添加到时间轴</button>
+					</form>
+
+					<button class="panel-btn panel-btn--primary show-play-btn" type="button">播放烟花秀</button>
+				</div>
+			</div>
+
+			<div class="side-panel wish-panel hide">
+				<div class="side-panel__dialog">
+					<button class="btn btn--bright side-panel__close-btn wish-panel__close-btn" type="button" aria-label="关闭许愿">
+						<svg fill="white" width="24" height="24" aria-hidden="true">
+							<use href="#icon-close" xlink:href="#icon-close"></use>
+						</svg>
+					</button>
+					<div class="side-panel__header">许愿</div>
+					<div class="side-panel__subheader">写下祝福，让它在夜空中绽放</div>
+					<form class="wish-form">
+						<input class="wish-input" type="text" maxlength="12" placeholder="输入祝福语（最多 12 个字）" autocomplete="off" spellcheck="false" />
+						<button class="panel-btn panel-btn--primary wish-submit-btn" type="submit">放飞祝福</button>
+					</form>
+					<div class="wish-list-header">
+						<span>祝福列表</span>
+						<button class="panel-btn panel-btn--small wish-clear-btn" type="button">清空</button>
+					</div>
+					<div class="wish-list"></div>
+					<div class="wish-empty">还没有祝福，快来许下第一个愿望吧</div>
+				</div>
+			</div>
+
+			<div class="player-hud hide">
+				<div class="player-hud__info">
+					<div class="player-hud__title">
+						<span class="player-hud__name"></span>
+						<span class="player-hud__index"></span>
+					</div>
+					<div class="player-hud__bar">
+						<div class="player-hud__progress-fill"></div>
+					</div>
+					<div class="player-hud__time">
+						<span class="player-hud__elapsed">00:00</span>
+						<span class="player-hud__total">00:00</span>
+					</div>
+				</div>
+				<div class="player-hud__controls">
+					<button class="panel-btn player-hud__pause-btn" type="button" aria-label="暂停或继续">
+						<svg fill="white" width="20" height="20" aria-hidden="true">
+							<use href="#icon-pause" xlink:href="#icon-pause"></use>
+						</svg>
+					</button>
+					<button class="panel-btn player-hud__skip-btn" type="button" aria-label="跳过当前节目">
+						<svg fill="white" width="20" height="20" aria-hidden="true">
+							<use href="#icon-skip" xlink:href="#icon-skip"></use>
+						</svg>
+					</button>
+					<button class="panel-btn player-hud__stop-btn" type="button" aria-label="停止播放">
+						<svg fill="white" width="20" height="20" aria-hidden="true">
+							<use href="#icon-stop" xlink:href="#icon-stop"></use>
+						</svg>
+					</button>
+				</div>
+			</div>
+
 			<div class="help-modal">
 				<div class="help-modal__overlay"></div>
 				<div class="help-modal__dialog">
@@ -159,7 +315,10 @@
 		<script src="./js/app/config.js"></script>
 		<script src="./js/app/store.js"></script>
 		<script src="./js/app/background-manager.js"></script>
+		<script src="./js/app/shows.js"></script>
 		<script src="./js/app/ui.js"></script>
+		<script src="./js/fireworks/player.js"></script>
+		<script src="./js/fireworks/show-ui.js"></script>
 		<script src="./js/fireworks/runtime.js"></script>
 		<script src="./js/fireworks/shells.js"></script>
 		<script src="./js/fireworks/interaction.js"></script>

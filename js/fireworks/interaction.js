@@ -17,28 +17,48 @@ function registerUserInteraction() {
 	soundManager.registerInteraction();
 }
 
+const topControlButtons = [
+	{ nodeSelector: ".pause-btn", action: togglePause },
+	{ nodeSelector: ".sound-btn", action: toggleSound },
+	{ nodeSelector: ".settings-btn", action: () => toggleMenu() },
+	{ nodeSelector: ".show-btn", action: () => setEditorOpen(true) },
+	{ nodeSelector: ".wish-btn", action: () => setWishOpen(true) },
+];
+
+function pointHitsButton(event, button) {
+	if (!button || button.offsetParent === null) {
+		return false;
+	}
+
+	const scaleX = mainStage.width / (mainStage.canvas.getBoundingClientRect().width || mainStage.width);
+	const scaleY = mainStage.height / (mainStage.canvas.getBoundingClientRect().height || mainStage.height);
+	const rect = button.getBoundingClientRect();
+	const canvasRect = mainStage.canvas.getBoundingClientRect();
+	const left = (rect.left - canvasRect.left) * scaleX;
+	const right = (rect.right - canvasRect.left) * scaleX;
+	const top = (rect.top - canvasRect.top) * scaleY;
+	const bottom = (rect.bottom - canvasRect.top) * scaleY;
+	return event.x >= left && event.x <= right && event.y >= top && event.y <= bottom;
+}
+
 function handlePointerStart(event) {
 	registerUserInteraction();
-	const buttonSize = 50;
 
-	if (event.y < buttonSize) {
-		if (event.x < buttonSize) {
-			togglePause();
-			return;
-		}
-
-		if (event.x > mainStage.width / 2 - buttonSize / 2 && event.x < mainStage.width / 2 + buttonSize / 2) {
-			toggleSound();
-			return;
-		}
-
-		if (event.x > mainStage.width - buttonSize) {
-			toggleMenu();
-			return;
+	const controlsVisible = !appNodes.controls.classList.contains("hide");
+	if (controlsVisible) {
+		for (const control of topControlButtons) {
+			if (pointHitsButton(event, document.querySelector(control.nodeSelector))) {
+				control.action();
+				return;
+			}
 		}
 	}
 
 	if (!isRunning()) {
+		return;
+	}
+
+	if (showPlayer.isActive()) {
 		return;
 	}
 
@@ -78,6 +98,14 @@ function handleKeydown(event) {
 	}
 
 	if (event.keyCode === 27) {
+		if (store.state.editorOpen) {
+			setEditorOpen(false);
+			return;
+		}
+		if (store.state.wishOpen) {
+			setWishOpen(false);
+			return;
+		}
 		toggleMenu(false);
 	}
 }
@@ -117,6 +145,11 @@ function updateGlobals(timeStep, lag) {
 		if (speedBarOpacity < 0) {
 			speedBarOpacity = 0;
 		}
+	}
+
+	if (showPlayer.isActive()) {
+		showPlayer.tick(timeStep);
+		return;
 	}
 
 	if (store.state.config.autoLaunch) {

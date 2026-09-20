@@ -259,21 +259,32 @@ function createParticleArc(start, arcLength, count, randomness, particleFactory)
 	}
 }
 
-function getWordDots(word) {
+function getWordDots(word, options = {}) {
 	if (!word) {
 		return null;
 	}
 
-	const fontSize = MyMath.randomInt(appConfig.wordFontSizeMin, appConfig.wordFontSizeMax);
-	const cacheKey = `${word}:${fontSize}`;
-	if (!wordDotCache.has(cacheKey)) {
-		wordDotCache.set(
-			cacheKey,
-			MyMath.literalLattice(word, appConfig.wordPointDensity, appConfig.wordFontFamily, `${fontSize}px`)
-		);
+	let fontSize = options.fontSize || MyMath.randomInt(appConfig.wordFontSizeMin, appConfig.wordFontSizeMax);
+	const cacheKey = `${word}:${fontSize}:${options.maxWidth || 0}`;
+	if (wordDotCache.has(cacheKey)) {
+		return wordDotCache.get(cacheKey);
 	}
 
-	return wordDotCache.get(cacheKey);
+	let map = MyMath.literalLattice(word, appConfig.wordPointDensity, appConfig.wordFontFamily, `${fontSize}px`);
+
+	if (options.maxWidth) {
+		const glyphPadding = 20;
+		const maxGlyphWidth = Math.max(40, options.maxWidth - glyphPadding);
+		let iterations = 0;
+		while (map.width - glyphPadding > maxGlyphWidth && fontSize > 24 && iterations < 6) {
+			fontSize = Math.max(24, Math.floor(fontSize * (maxGlyphWidth / (map.width - glyphPadding))));
+			map = MyMath.literalLattice(word, appConfig.wordPointDensity, appConfig.wordFontFamily, `${fontSize}px`);
+			iterations += 1;
+		}
+	}
+
+	wordDotCache.set(cacheKey, map);
+	return map;
 }
 
 function createBurst(count, particleFactory, startAngle = 0, arcLength = PI_2) {
@@ -298,8 +309,8 @@ function createBurst(count, particleFactory, startAngle = 0, arcLength = PI_2) {
 	}
 }
 
-function createWordBurst(wordText, particleFactory, centerX, centerY) {
-	const map = getWordDots(wordText);
+function createWordBurst(wordText, particleFactory, centerX, centerY, maxWidth) {
+	const map = getWordDots(wordText, { maxWidth });
 	if (!map) {
 		return;
 	}
@@ -384,6 +395,7 @@ class Shell {
 		this.color = options.color || randomColor();
 		this.glitterColor = options.glitterColor || this.color;
 		this.disableWord = options.disableWord || false;
+		this.wordText = typeof options.wordText === "string" ? options.wordText : "";
 
 		if (!this.starCount) {
 			const density = options.starDensity || 1;
@@ -642,7 +654,9 @@ class Shell {
 		}
 
 		if (wordBurstTracker.shouldCreateBurst(this)) {
-			createWordBurst(randomWord(), dotStarFactory, x, y);
+			const wordText = this.wordText || randomWord();
+			const maxWordWidth = stageW ? Math.min(stageW * 0.8, 900) : undefined;
+			createWordBurst(wordText, dotStarFactory, x, y, maxWordWidth);
 		}
 
 		if (this.pistil) {

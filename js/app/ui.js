@@ -51,7 +51,7 @@
 		nodes.soundBtnSVG.setAttribute("href", soundBtnIcon);
 		nodes.soundBtnSVG.setAttribute("xlink:href", soundBtnIcon);
 
-		nodes.controls.classList.toggle("hide", state.menuOpen || state.config.hideControls);
+		nodes.controls.classList.toggle("hide", state.menuOpen || state.editorOpen || state.wishOpen || state.config.hideControls);
 		nodes.canvasContainer.classList.toggle("blur", state.menuOpen);
 		nodes.menu.classList.toggle("hide", !state.menuOpen);
 		nodes.finaleModeFormOption.style.opacity = state.config.autoLaunch ? 1 : 0.32;

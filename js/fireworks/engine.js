@@ -41,6 +41,37 @@ function populateAppControls() {
 	});
 }
 
+let showControllerInitialized = false;
+
+function initShowController() {
+	if (showControllerInitialized) {
+		return;
+	}
+	showControllerInitialized = true;
+	showController = createShowUI({
+		nodes: appNodes,
+		showManager,
+		wishManager,
+		player: showPlayer,
+		shellNames,
+		setEditorOpen,
+		setWishOpen,
+	});
+	store.subscribe((state, previousState) => {
+		if (
+			state.editorOpen !== previousState.editorOpen ||
+			state.wishOpen !== previousState.wishOpen ||
+			state.shows !== previousState.shows ||
+			state.wishes !== previousState.wishes ||
+			state.activeShowId !== previousState.activeShowId
+		) {
+			showController.onStateChange(state);
+		}
+	});
+	showController.onStateChange(store.state);
+	showController.renderHud(showPlayer.getSnapshot());
+}
+
 function init() {
 	const loadingNode = document.querySelector(".loading-init");
 	if (loadingNode) {
@@ -59,6 +90,7 @@ function init() {
 		});
 	}
 
+	initShowController();
 	togglePause(false);
 	renderApp(store.state, appNodes);
 	configDidUpdate();
@@ -84,6 +116,27 @@ function attachRuntimeBindings() {
 		},
 	});
 
+	appNodes.pauseBtn.addEventListener("click", () => {
+		registerUserInteraction();
+		togglePause();
+	});
+	appNodes.soundBtn.addEventListener("click", () => {
+		registerUserInteraction();
+		toggleSound();
+	});
+	appNodes.settingsBtn.addEventListener("click", () => {
+		registerUserInteraction();
+		toggleMenu();
+	});
+	appNodes.showBtn.addEventListener("click", () => {
+		registerUserInteraction();
+		setEditorOpen(true);
+	});
+	appNodes.wishBtn.addEventListener("click", () => {
+		registerUserInteraction();
+		setWishOpen(true);
+	});
+
 	mainStage.addEventListener("pointerstart", handlePointerStart);
 	mainStage.addEventListener("pointerend", handlePointerEnd);
 	mainStage.addEventListener("pointermove", handlePointerMove);
@@ -100,6 +153,8 @@ function attachRuntimeBindings() {
 	handleResize();
 }
 
+let appInitStarted = false;
+
 applyStaticText();
 attachRuntimeBindings();
 
@@ -110,10 +165,16 @@ if (IS_HEADER) {
 	setTimeout(() => {
 		Promise.all([soundManager.preload()])
 			.then(() => {
-				init();
+				if (!appInitStarted) {
+					appInitStarted = true;
+					init();
+				}
 			})
 			.catch(() => {
-				init();
+				if (!appInitStarted) {
+					appInitStarted = true;
+					init();
+				}
 			});
 	}, 0);
 }

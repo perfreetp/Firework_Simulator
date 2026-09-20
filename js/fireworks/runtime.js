@@ -12,6 +12,7 @@ const appConfig = window.FireworksAppConfig;
 const { createDefaultState, createStore } = window.FireworksAppStore;
 const { createBackgroundManager } = window.FireworksBackgroundManager;
 const { queryNodes, populateControls, renderApp, setBackgroundStatus, bindAppControls } = window.FireworksAppUI;
+const { createShowManager, createWishManager } = window.FireworksShows;
 
 const IS_MOBILE = window.innerWidth <= 640;
 const IS_DESKTOP = window.innerWidth > 800;
@@ -108,6 +109,26 @@ const backgroundManager = createBackgroundManager({
 	},
 });
 
+const showManager = createShowManager({ store });
+const wishManager = createWishManager({ store });
+
+let showController = null;
+
+const showPlayer = ShowPlayer.create({
+	store,
+	onChange(snapshot) {
+		if (showController) {
+			showController.renderHud(snapshot);
+		}
+	},
+	onFinish() {
+		const { autoLaunch } = store.state.config;
+		if (autoLaunch) {
+			autoLaunchTime = 0;
+		}
+	},
+});
+
 const wordBurstTracker = {
 	shellsSinceLastBurst: 0,
 	forceNextBurst: true,
@@ -119,11 +140,20 @@ const wordBurstTracker = {
 		this.forceNextBurst = true;
 	},
 	shouldCreateBurst(shell) {
-		if (!store.state.config.wordShell || shell.disableWord || !shell.comet) {
+		if (shell.disableWord || !shell.comet) {
 			return false;
 		}
 
-		if (shell.forceWordBurst || this.forceNextBurst) {
+		if (shell.forceWordBurst) {
+			this.reset();
+			return true;
+		}
+
+		if (!store.state.config.wordShell) {
+			return false;
+		}
+
+		if (this.forceNextBurst) {
 			this.reset();
 			return true;
 		}
@@ -173,7 +203,22 @@ function toggleSound(toggle) {
 
 function toggleMenu(toggle) {
 	const nextValue = typeof toggle === "boolean" ? toggle : !store.state.menuOpen;
-	store.setState({ menuOpen: nextValue });
+	store.setState({ menuOpen: nextValue, editorOpen: false, wishOpen: false });
+}
+
+function setEditorOpen(open) {
+	if (open) {
+		if (showPlayer.isActive()) {
+			showPlayer.stop();
+		}
+		store.setState({ menuOpen: false, wishOpen: false, editorOpen: true });
+	} else {
+		store.setState({ editorOpen: false });
+	}
+}
+
+function setWishOpen(open) {
+	store.setState({ wishOpen: open, menuOpen: false, editorOpen: false });
 }
 
 function updateConfig(nextConfig) {
@@ -209,7 +254,7 @@ function configDidUpdate() {
 	Spark.drawWidth = quality === QUALITY_HIGH ? 0.75 : 1;
 }
 
-const isRunning = (state = store.state) => !state.paused && !state.menuOpen;
+const isRunning = (state = store.state) => !state.paused && !state.menuOpen && !state.editorOpen;
 const soundEnabledSelector = (state = store.state) => state.soundEnabled;
 const canPlaySoundSelector = (state = store.state) => isRunning(state) && soundEnabledSelector(state);
 const qualitySelector = () => Number(store.state.config.quality);
