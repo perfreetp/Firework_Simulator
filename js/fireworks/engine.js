@@ -63,6 +63,10 @@ function init() {
 	renderApp(store.state, appNodes);
 	configDidUpdate();
 	applyResolvedBackground();
+
+	initShowEditor();
+	initShowPlayer();
+	initWishManager();
 }
 
 function attachRuntimeBindings() {

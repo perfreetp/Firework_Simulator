@@ -45,14 +45,17 @@
 	function renderApp(state, nodes) {
 		const pauseBtnIcon = `#icon-${state.paused ? "play" : "pause"}`;
 		const soundBtnIcon = `#icon-sound-${state.soundEnabled ? "on" : "off"}`;
+		const editorOpen = typeof global.isShowEditorOpen === "function" && global.isShowEditorOpen();
+		const wishOpen = typeof global.isWishPanelOpen === "function" && global.isWishPanelOpen();
+		const overlayOpen = state.menuOpen || editorOpen || wishOpen;
 
 		nodes.pauseBtnSVG.setAttribute("href", pauseBtnIcon);
 		nodes.pauseBtnSVG.setAttribute("xlink:href", pauseBtnIcon);
 		nodes.soundBtnSVG.setAttribute("href", soundBtnIcon);
 		nodes.soundBtnSVG.setAttribute("xlink:href", soundBtnIcon);
 
-		nodes.controls.classList.toggle("hide", state.menuOpen || state.config.hideControls);
-		nodes.canvasContainer.classList.toggle("blur", state.menuOpen);
+		nodes.controls.classList.toggle("hide", overlayOpen || state.config.hideControls);
+		nodes.canvasContainer.classList.toggle("blur", state.menuOpen || editorOpen);
 		nodes.menu.classList.toggle("hide", !state.menuOpen);
 		nodes.finaleModeFormOption.style.opacity = state.config.autoLaunch ? 1 : 0.32;
 

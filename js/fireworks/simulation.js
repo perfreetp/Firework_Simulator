@@ -259,12 +259,16 @@ function createParticleArc(start, arcLength, count, randomness, particleFactory)
 	}
 }
 
-function getWordDots(word) {
+function getWordDots(word, fontSizeOverride) {
 	if (!word) {
 		return null;
 	}
 
-	const fontSize = MyMath.randomInt(appConfig.wordFontSizeMin, appConfig.wordFontSizeMax);
+	let fontSize = fontSizeOverride;
+	if (!Number.isFinite(fontSize)) {
+		fontSize = MyMath.randomInt(appConfig.wordFontSizeMin, appConfig.wordFontSizeMax);
+	}
+
 	const cacheKey = `${word}:${fontSize}`;
 	if (!wordDotCache.has(cacheKey)) {
 		wordDotCache.set(
@@ -298,8 +302,24 @@ function createBurst(count, particleFactory, startAngle = 0, arcLength = PI_2) {
 	}
 }
 
-function createWordBurst(wordText, particleFactory, centerX, centerY) {
-	const map = getWordDots(wordText);
+function fitWordFontSize(wordText, targetWidth) {
+	const maxWidth = Math.max(120, targetWidth);
+	let fontSize = appConfig.wordFontSizeMax;
+
+	while (fontSize > appConfig.wordFontSizeMin) {
+		const map = getWordDots(wordText, fontSize);
+		if (!map || map.width <= maxWidth) {
+			break;
+		}
+
+		fontSize -= 8;
+	}
+
+	return fontSize;
+}
+
+function createWordBurst(wordText, particleFactory, centerX, centerY, fontSizeOverride) {
+	const map = getWordDots(wordText, fontSizeOverride);
 	if (!map) {
 		return;
 	}
@@ -384,6 +404,8 @@ class Shell {
 		this.color = options.color || randomColor();
 		this.glitterColor = options.glitterColor || this.color;
 		this.disableWord = options.disableWord || false;
+		this.wordText = typeof options.wordText === "string" ? options.wordText : "";
+		this.wordFontFit = options.wordFontFit === true;
 
 		if (!this.starCount) {
 			const density = options.starDensity || 1;
@@ -641,8 +663,14 @@ class Shell {
 			throw new Error(`无效的烟花颜色配置: ${this.color}`);
 		}
 
-		if (wordBurstTracker.shouldCreateBurst(this)) {
-			createWordBurst(randomWord(), dotStarFactory, x, y);
+		if (this.wordText || wordBurstTracker.shouldCreateBurst(this)) {
+			const wordText = this.wordText || randomWord();
+			let fittedFontSize;
+			if (this.wordFontFit) {
+				fittedFontSize = fitWordFontSize(wordText, Math.max(stageW * 0.85, this.spreadSize * 2.2));
+			}
+
+			createWordBurst(wordText, dotStarFactory, x, y, fittedFontSize);
 		}
 
 		if (this.pistil) {

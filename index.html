@@ -38,6 +38,15 @@
 				<symbol id="icon-sound-off" viewBox="0 0 24 24">
 					<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
 				</symbol>
+				<symbol id="icon-calendar" viewBox="0 0 24 24">
+					<path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+				</symbol>
+				<symbol id="icon-heart" viewBox="0 0 24 24">
+					<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+				</symbol>
+				<symbol id="icon-skip" viewBox="0 0 24 24">
+					<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+				</symbol>
 			</svg>
 		</div>
 		<!-- App -->
@@ -57,9 +66,19 @@
 							<use href="#icon-pause" xlink:href="#icon-pause"></use>
 						</svg>
 					</button>
+					<button class="btn wish-btn" type="button" aria-label="打开许愿">
+						<svg fill="white" width="24" height="24" aria-hidden="true">
+							<use href="#icon-heart" xlink:href="#icon-heart"></use>
+						</svg>
+					</button>
 					<button class="btn sound-btn" type="button" aria-label="切换声音">
 						<svg fill="white" width="24" height="24" aria-hidden="true">
 							<use href="#icon-sound-off" xlink:href="#icon-sound-off"></use>
+						</svg>
+					</button>
+					<button class="btn show-btn" type="button" aria-label="打开烟花秀编排">
+						<svg fill="white" width="24" height="24" aria-hidden="true">
+							<use href="#icon-calendar" xlink:href="#icon-calendar"></use>
 						</svg>
 					</button>
 					<button class="btn settings-btn" type="button" aria-label="打开设置">
@@ -67,6 +86,89 @@
 							<use href="#icon-settings" xlink:href="#icon-settings"></use>
 						</svg>
 					</button>
+				</div>
+				<!-- 烟花秀编排面板 -->
+				<div class="show-editor hide">
+					<div class="show-editor__panel">
+						<button class="btn btn--bright show-editor__close" type="button" aria-label="关闭编排">
+							<svg fill="white" width="24" height="24" aria-hidden="true">
+								<use href="#icon-close" xlink:href="#icon-close"></use>
+							</svg>
+						</button>
+						<div class="show-editor__header">烟花秀编排</div>
+						<div class="show-editor__subheader">在时间轴上安排每一发烟花，节目单会自动保存到本地</div>
+						<div class="show-editor__body">
+							<div class="show-editor__name-row">
+								<label for="show-name-input">节目单名称</label>
+								<input class="show-name-input" id="show-name-input" type="text" maxlength="40" placeholder="给节目单起个名字" autocomplete="off" spellcheck="false" />
+							</div>
+							<div class="show-editor__toolbar">
+								<button class="show-add-btn" type="button">添加节目</button>
+								<button class="show-play-btn" type="button">播放烟花秀</button>
+								<button class="show-export-btn" type="button">导出</button>
+								<button class="show-import-btn" type="button">导入</button>
+								<input class="show-import-file" type="file" accept="application/json,.json" hidden />
+							</div>
+							<div class="show-editor__status" aria-live="polite"></div>
+							<div class="show-program-list"></div>
+							<div class="show-timeline">
+								<div class="show-timeline__track"></div>
+								<div class="show-timeline__axis">
+									<span>0s</span>
+									<span class="show-timeline__total">0s</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 播放信息条 -->
+				<div class="show-player hide">
+					<div class="show-player__info">
+						<div class="show-player__title">
+							<span class="show-player__name"></span>
+							<span class="show-player__current"></span>
+						</div>
+						<div class="show-player__progress"><div class="show-player__progress-bar"></div></div>
+						<div class="show-player__time"><span class="show-player__elapsed">0:00</span><span class="show-player__total">0:00</span></div>
+					</div>
+					<div class="show-player__actions">
+						<button class="show-player__pause" type="button" aria-label="暂停或继续播放">
+							<svg fill="white" width="20" height="20" aria-hidden="true">
+								<use href="#icon-pause" xlink:href="#icon-pause"></use>
+							</svg>
+						</button>
+						<button class="show-player__skip" type="button" aria-label="跳过当前节目">
+							<svg fill="white" width="20" height="20" aria-hidden="true">
+								<use href="#icon-skip" xlink:href="#icon-skip"></use>
+							</svg>
+						</button>
+						<button class="show-player__stop" type="button" aria-label="退出播放">
+							<svg fill="white" width="20" height="20" aria-hidden="true">
+								<use href="#icon-close" xlink:href="#icon-close"></use>
+							</svg>
+						</button>
+					</div>
+				</div>
+				<!-- 许愿面板 -->
+				<div class="wish-panel hide">
+					<div class="wish-panel__box">
+						<button class="btn btn--bright wish-panel__close" type="button" aria-label="关闭许愿">
+							<svg fill="white" width="24" height="24" aria-hidden="true">
+								<use href="#icon-close" xlink:href="#icon-close"></use>
+							</svg>
+						</button>
+						<div class="wish-panel__header">许愿</div>
+						<div class="wish-panel__subheader">写下祝福，它会化作文字烟花在夜空绽放</div>
+						<div class="wish-panel__form">
+							<input class="wish-input" type="text" maxlength="12" placeholder="写下你的祝福语（最多12字）" autocomplete="off" spellcheck="false" />
+							<button class="wish-submit-btn" type="button">放飞祝福</button>
+						</div>
+						<div class="wish-panel__list-head">
+							<span>祝福列表</span>
+							<button class="wish-clear-btn" type="button">清空历史</button>
+						</div>
+						<div class="wish-panel__list"></div>
+					</div>
 				</div>
 				<div class="menu hide">
 					<div class="menu__inner-wrap">
@@ -166,5 +268,9 @@
 		<script src="./js/fireworks/simulation.js"></script>
 		<script src="./js/fireworks/audio.js"></script>
 		<script src="./js/fireworks/engine.js"></script>
+		<script src="./js/show/show-store.js"></script>
+		<script src="./js/show/show-editor.js"></script>
+		<script src="./js/show/show-player.js"></script>
+		<script src="./js/show/wish-manager.js"></script>
 	</body>
 </html>

@@ -21,9 +21,19 @@ function handlePointerStart(event) {
 	registerUserInteraction();
 	const buttonSize = 50;
 
-	if (event.y < buttonSize) {
+	const topControlsActive =
+		event.y < buttonSize && !store.state.menuOpen && !store.state.config.hideControls;
+
+	if (topControlsActive) {
 		if (event.x < buttonSize) {
 			togglePause();
+			return;
+		}
+
+		if (event.x > buttonSize && event.x < buttonSize * 2) {
+			if (typeof toggleWishPanel === "function") {
+				toggleWishPanel();
+			}
 			return;
 		}
 
@@ -32,10 +42,22 @@ function handlePointerStart(event) {
 			return;
 		}
 
+		if (event.x > mainStage.width - buttonSize * 2 && event.x < mainStage.width - buttonSize) {
+			if (typeof toggleShowEditor === "function") {
+				toggleShowEditor();
+			}
+			return;
+		}
+
 		if (event.x > mainStage.width - buttonSize) {
 			toggleMenu();
 			return;
 		}
+	}
+
+	if ((typeof isShowEditorOpen === "function" && isShowEditorOpen()) ||
+		(typeof isWishPanelOpen === "function" && isWishPanelOpen())) {
+		return;
 	}
 
 	if (!isRunning()) {
@@ -48,6 +70,10 @@ function handlePointerStart(event) {
 	}
 
 	if (event.onCanvas) {
+		if (typeof isShowPlaying === "function" && isShowPlaying()) {
+			return;
+		}
+
 		launchShellFromConfig(event);
 	}
 }
@@ -119,10 +145,14 @@ function updateGlobals(timeStep, lag) {
 		}
 	}
 
-	if (store.state.config.autoLaunch) {
+	if (store.state.config.autoLaunch && !(typeof isShowPlaying === "function" && isShowPlaying())) {
 		autoLaunchTime -= timeStep;
 		if (autoLaunchTime <= 0) {
 			autoLaunchTime = startSequence() * 1.25;
 		}
+	}
+
+	if (typeof updateShowPlayback === "function") {
+		updateShowPlayback(timeStep);
 	}
 }

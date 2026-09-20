@@ -503,6 +503,63 @@ function seqSmallBarrage() {
 seqSmallBarrage.cooldown = 15000;
 seqSmallBarrage.lastCalled = Date.now();
 
+function buildShellFromProgram(program) {
+	const shellFactory = shellTypes[program.shell] || randomShell;
+	const shellOptions = shellFactory(Number(program.size));
+
+	if (program.color && program.color !== "random") {
+		shellOptions.color = COLOR[program.color] || shellOptions.color;
+		shellOptions.secondColor = null;
+		shellOptions.pistilColor = null;
+	}
+
+	if (program.wordEnabled && program.word) {
+		shellOptions.forceWordBurst = true;
+		shellOptions.wordText = program.word;
+	}
+
+	return shellOptions;
+}
+
+function launchProgramShell(program) {
+	if (!program) {
+		return;
+	}
+
+	const shell = new Shell(buildShellFromProgram(program));
+	const horizontalPosition = fitShellPositionInBoundsH(Number(program.x));
+	const launchHeight = fitShellPositionInBoundsV(Number(program.height));
+	shell.launch(horizontalPosition, launchHeight);
+	wordBurstTracker.reset();
+}
+
+function launchWordFirework(word, options) {
+	if (!word) {
+		return null;
+	}
+
+	const settings = options || {};
+	const size = typeof settings.size === "number" ? settings.size : Math.max(2, shellSizeSelector());
+	const shellOptions = crysanthemumShell(size);
+	shellOptions.forceWordBurst = true;
+	shellOptions.wordText = word;
+	shellOptions.wordFontFit = true;
+	shellOptions.color = settings.color || COLOR.White;
+	shellOptions.secondColor = null;
+	shellOptions.pistil = false;
+	shellOptions.glitter = "";
+
+	const shell = new Shell(shellOptions);
+	shell.launch(
+		typeof settings.x === "number" ? fitShellPositionInBoundsH(settings.x) : getRandomShellPositionH(),
+		typeof settings.height === "number"
+			? fitShellPositionInBoundsV(settings.height)
+			: getRandomShellSize().height
+	);
+	wordBurstTracker.reset();
+	return shell;
+}
+
 let isFirstSeq = true;
 const finaleCount = 32;
 let currentFinaleCount = 0;
